@@ -50,7 +50,7 @@ export default function App() {
     } finally {
       setLoading(false);
       if (resultsRef.current) {
-        resultsRef.current.focus(); // Enfocar resultados para lectores de pantalla
+        resultsRef.current.focus();
       }
     }
   };
@@ -70,10 +70,6 @@ export default function App() {
     <ThemeProvider theme={muiTheme}>
       <CssBaseline />
       <Box sx={{ minHeight: '100vh', position: 'relative', pb: 6 }}>
-        {/* Skip link para accesibilidad (opcional avanzado) */}
-        
-
-        {/* Botón de modo */}
         <IconButton
           onClick={toggleColorMode}
           sx={{
@@ -123,11 +119,11 @@ export default function App() {
             </Typography>
           </Box>
 
+          {/* ✅ Buscador SIN contenedor adicional */}
           <Box sx={{ display: 'flex', justifyContent: 'center', mb: 8 }}>
-  <SearchBar onSearch={handleSearch} />
-</Box>
+            <SearchBar onSearch={handleSearch} />
+          </Box>
 
-          {/* Zona de resultados con enfoque accesible */}
           <Box
             ref={resultsRef}
             tabIndex={-1}
@@ -318,4 +314,4 @@ export default function App() {
       </Box>
     </ThemeProvider>
   );
-                        }
+                       }
