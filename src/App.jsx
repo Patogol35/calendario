@@ -1,5 +1,5 @@
 // src/App.jsx
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Container,
@@ -32,14 +32,15 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [hasSearched, setHasSearched] = useState(false);
-  const [selectedBook, setSelectedBook] = useState(null); // ← Nuevo estado
+  const [selectedBook, setSelectedBook] = useState(null);
+  const resultsRef = useRef(null);
 
   const handleSearch = async (query) => {
     if (!query.trim()) return;
     setLoading(true);
     setError('');
     setHasSearched(true);
-    setSelectedBook(null); // ← Cerrar detalle al buscar
+    setSelectedBook(null);
     try {
       const res = await axios.get(`${API_BASE}?q=${encodeURIComponent(query)}&maxResults=24`);
       setBooks(res.data.items || []);
@@ -48,6 +49,9 @@ export default function App() {
       setBooks([]);
     } finally {
       setLoading(false);
+      if (resultsRef.current) {
+        resultsRef.current.focus(); // Enfocar resultados para lectores de pantalla
+      }
     }
   };
 
@@ -57,12 +61,33 @@ export default function App() {
 
   const handleCloseDetail = () => {
     setSelectedBook(null);
+    if (resultsRef.current) {
+      resultsRef.current.focus();
+    }
   };
 
   return (
     <ThemeProvider theme={muiTheme}>
       <CssBaseline />
       <Box sx={{ minHeight: '100vh', position: 'relative', pb: 6 }}>
+        {/* Skip link para accesibilidad (opcional avanzado) */}
+        <a
+          href="#main-content"
+          style={{
+            position: 'absolute',
+            top: 10,
+            left: 10,
+            backgroundColor: '#000',
+            color: '#fff',
+            padding: 8,
+            borderRadius: 4,
+            textDecoration: 'none',
+            zIndex: 1300,
+          }}
+        >
+          Ir al contenido principal
+        </a>
+
         {/* Botón de modo */}
         <IconButton
           onClick={toggleColorMode}
@@ -81,6 +106,7 @@ export default function App() {
               boxShadow: 6,
             },
           }}
+          aria-label={mode === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
         >
           {mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
         </IconButton>
@@ -99,6 +125,7 @@ export default function App() {
                 fontWeight: 800,
                 mb: 1.5,
               }}
+              aria-label="BookFinder: buscador de libros"
             >
               BookFinder
             </Typography>
@@ -111,7 +138,6 @@ export default function App() {
             </Typography>
           </Box>
 
-          {/* Buscador */}
           <Box sx={{ display: 'flex', justifyContent: 'center', mb: 8 }}>
             <Paper
               elevation={0}
@@ -131,179 +157,193 @@ export default function App() {
             </Paper>
           </Box>
 
-          {error && (
-            <Alert severity="error" sx={{ mb: 4, maxWidth: 600, mx: 'auto' }}>
-              {error}
-            </Alert>
-          )}
+          {/* Zona de resultados con enfoque accesible */}
+          <Box
+            ref={resultsRef}
+            tabIndex={-1}
+            id="main-content"
+            sx={{ outline: 'none' }}
+            aria-live="polite"
+            aria-atomic="true"
+          >
+            {error && (
+              <Alert severity="error" sx={{ mb: 4, maxWidth: 600, mx: 'auto' }}>
+                {error}
+              </Alert>
+            )}
 
-          {/* Vista de detalle del libro */}
-          {selectedBook && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 20 }}
-              style={{ maxWidth: 900, mx: 'auto', mb: 8 }}
-            >
-              <Paper
-                sx={{
-                  p: 4,
-                  borderRadius: '24px',
-                  bgcolor: 'background.paper',
-                  position: 'relative',
-                }}
+            {selectedBook && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 20 }}
+                style={{ maxWidth: 900, mx: 'auto', mb: 8 }}
+                role="dialog"
+                aria-modal="true"
+                aria-label={`Detalles del libro: ${selectedBook.volumeInfo.title}`}
               >
-                <IconButton
-                  onClick={handleCloseDetail}
+                <Paper
                   sx={{
-                    position: 'absolute',
-                    top: 16,
-                    right: 16,
-                    bgcolor: 'background.default',
-                    '&:hover': { bgcolor: 'divider' },
+                    p: 4,
+                    borderRadius: '24px',
+                    bgcolor: 'background.paper',
+                    position: 'relative',
                   }}
                 >
-                  <CloseIcon />
-                </IconButton>
+                  <IconButton
+                    onClick={handleCloseDetail}
+                    sx={{
+                      position: 'absolute',
+                      top: 16,
+                      right: 16,
+                      bgcolor: 'background.default',
+                      '&:hover': { bgcolor: 'divider' },
+                    }}
+                    aria-label="Cerrar detalles del libro"
+                  >
+                    <CloseIcon />
+                  </IconButton>
 
-                <Grid container spacing={4}>
-                  <Grid item xs={12} md={4}>
-                    <Box
-                      component="img"
-                      src={
-                        selectedBook.volumeInfo.imageLinks?.thumbnail
-                          ? selectedBook.volumeInfo.imageLinks.thumbnail.replace('http://', 'https://')
-                          : 'https://placehold.co/400x600/e2e8f0/64748b?text=No+Cover'
-                      }
-                      onError={(e) => (e.currentTarget.src = 'https://placehold.co/400x600/e2e8f0/64748b?text=No+Cover')}
-                      alt={selectedBook.volumeInfo.title}
-                      sx={{
-                        width: '100%',
-                        borderRadius: '16px',
-                        boxShadow: 3,
-                      }}
-                    />
-                  </Grid>
-                  <Grid item xs={12} md={8}>
-                    <Typography variant="h4" fontWeight={700} gutterBottom>
-                      {selectedBook.volumeInfo.title}
-                    </Typography>
-                    <Typography variant="h6" color="text.secondary" gutterBottom>
-                      {selectedBook.volumeInfo.authors?.join(', ') || 'Autor desconocido'}
-                    </Typography>
-
-                    <Box mt={2} mb={3}>
-                      <Typography variant="body1" paragraph>
-                        {selectedBook.volumeInfo.description
-                          ? selectedBook.volumeInfo.description.replace(/<[^>]*>/g, '')
-                          : 'Sin descripción disponible.'}
+                  <Grid container spacing={4}>
+                    <Grid item xs={12} md={4}>
+                      <Box
+                        component="img"
+                        src={
+                          selectedBook.volumeInfo.imageLinks?.thumbnail
+                            ? selectedBook.volumeInfo.imageLinks.thumbnail.replace('http://', 'https://')
+                            : 'https://placehold.co/400x600/e2e8f0/64748b?text=Portada+no+disponible'
+                        }
+                        onError={(e) => (e.currentTarget.src = 'https://placehold.co/400x600/e2e8f0/64748b?text=Portada+no+disponible')}
+                        alt={`Portada del libro: ${selectedBook.volumeInfo.title || 'desconocido'}`}
+                        sx={{
+                          width: '100%',
+                          borderRadius: '16px',
+                          boxShadow: 3,
+                        }}
+                      />
+                    </Grid>
+                    <Grid item xs={12} md={8}>
+                      <Typography variant="h4" fontWeight={700} gutterBottom>
+                        {selectedBook.volumeInfo.title}
                       </Typography>
-                    </Box>
+                      <Typography variant="h6" color="text.secondary" gutterBottom>
+                        {selectedBook.volumeInfo.authors?.join(', ') || 'Autor desconocido'}
+                      </Typography>
 
-                    <Divider sx={{ my: 2 }} />
+                      <Box mt={2} mb={3}>
+                        <Typography variant="body1" paragraph>
+                          {selectedBook.volumeInfo.description
+                            ? selectedBook.volumeInfo.description.replace(/<[^>]*>/g, '')
+                            : 'Sin descripción disponible.'}
+                        </Typography>
+                      </Box>
 
-                    <Grid container spacing={1}>
-                      {selectedBook.volumeInfo.publishedDate && (
-                        <Grid item xs={12} sm={6}>
-                          <Typography variant="body2" color="text.secondary">
-                            <strong>Fecha de publicación:</strong> {selectedBook.volumeInfo.publishedDate}
-                          </Typography>
-                        </Grid>
-                      )}
-                      {selectedBook.volumeInfo.pageCount && (
-                        <Grid item xs={12} sm={6}>
-                          <Typography variant="body2" color="text.secondary">
-                            <strong>Páginas:</strong> {selectedBook.volumeInfo.pageCount}
-                          </Typography>
-                        </Grid>
-                      )}
-                      {selectedBook.volumeInfo.categories?.[0] && (
-                        <Grid item xs={12}>
-                          <Typography variant="body2" color="text.secondary">
-                            <strong>Categoría:</strong> {selectedBook.volumeInfo.categories.join(', ')}
-                          </Typography>
-                        </Grid>
-                      )}
-                      {selectedBook.volumeInfo.industryIdentifiers?.length > 0 && (
-                        <Grid item xs={12}>
-                          <Typography variant="body2" color="text.secondary">
-                            <strong>ISBN:</strong>{' '}
-                            {selectedBook.volumeInfo.industryIdentifiers
-                              .map(id => `${id.type}: ${id.identifier}`)
-                              .join(', ')}
-                          </Typography>
-                        </Grid>
+                      <Divider sx={{ my: 2 }} />
+
+                      <Grid container spacing={1}>
+                        {selectedBook.volumeInfo.publishedDate && (
+                          <Grid item xs={12} sm={6}>
+                            <Typography variant="body2" color="text.secondary">
+                              <strong>Fecha de publicación:</strong> {selectedBook.volumeInfo.publishedDate}
+                            </Typography>
+                          </Grid>
+                        )}
+                        {selectedBook.volumeInfo.pageCount && (
+                          <Grid item xs={12} sm={6}>
+                            <Typography variant="body2" color="text.secondary">
+                              <strong>Páginas:</strong> {selectedBook.volumeInfo.pageCount}
+                            </Typography>
+                          </Grid>
+                        )}
+                        {selectedBook.volumeInfo.categories?.[0] && (
+                          <Grid item xs={12}>
+                            <Typography variant="body2" color="text.secondary">
+                              <strong>Categoría:</strong> {selectedBook.volumeInfo.categories.join(', ')}
+                            </Typography>
+                          </Grid>
+                        )}
+                        {selectedBook.volumeInfo.industryIdentifiers?.length > 0 && (
+                          <Grid item xs={12}>
+                            <Typography variant="body2" color="text.secondary">
+                              <strong>ISBN:</strong>{' '}
+                              {selectedBook.volumeInfo.industryIdentifiers
+                                .map(id => `${id.type}: ${id.identifier}`)
+                                .join(', ')}
+                            </Typography>
+                          </Grid>
+                        )}
+                      </Grid>
+
+                      {selectedBook.volumeInfo.previewLink && (
+                        <Box mt={3}>
+                          <Link
+                            href={selectedBook.volumeInfo.previewLink}
+                            target="_blank"
+                            rel="noopener"
+                            underline="hover"
+                            sx={{ fontWeight: 600, color: 'primary.main' }}
+                            aria-label={`Vista previa del libro ${selectedBook.volumeInfo.title} en Google Books (se abre en nueva pestaña)`}
+                          >
+                            👁️ Ver vista previa (Google Books)
+                          </Link>
+                        </Box>
                       )}
                     </Grid>
-
-                    {/* Enlace de vista previa si existe */}
-                    {selectedBook.volumeInfo.previewLink && (
-                      <Box mt={3}>
-                        <Link
-                          href={selectedBook.volumeInfo.previewLink}
-                          target="_blank"
-                          rel="noopener"
-                          underline="hover"
-                          sx={{ fontWeight: 600, color: 'primary.main' }}
-                        >
-                          👁️ Ver vista previa (Google Books)
-                        </Link>
-                      </Box>
-                    )}
                   </Grid>
-                </Grid>
-              </Paper>
-            </motion.div>
-          )}
+                </Paper>
+              </motion.div>
+            )}
 
-          {/* Lista de libros */}
-          {!selectedBook && (
-            <>
-              {loading ? (
-                <Box display="flex" justifyContent="center" my={10}>
-                  <CircularProgress size={48} />
-                </Box>
-              ) : (
-                <AnimatePresence>
-                  {books.length > 0 && (
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                    >
-                      <Grid container spacing={{ xs: 2, sm: 3, md: 4 }} justifyContent="center">
-                        {books.map((book) => (
-                          <Grid item xs={12} sm={6} md={4} lg={3} key={book.id}>
-                            <BookCard
-                              book={book}
-                              mode={mode}
-                              onClick={() => handleSelectBook(book)}
-                            />
-                          </Grid>
-                        ))}
-                      </Grid>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              )}
+            {!selectedBook && (
+              <>
+                {loading ? (
+                  <Box display="flex" justifyContent="center" my={10} aria-live="polite">
+                    <CircularProgress size={48} aria-label="Cargando resultados de búsqueda..." />
+                  </Box>
+                ) : (
+                  <AnimatePresence>
+                    {books.length > 0 && (
+                      <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        role="region"
+                        aria-label="Lista de libros encontrados"
+                      >
+                        <Grid container spacing={{ xs: 2, sm: 3, md: 4 }} justifyContent="center">
+                          {books.map((book) => (
+                            <Grid item xs={12} sm={6} md={4} lg={3} key={book.id}>
+                              <BookCard
+                                book={book}
+                                mode={mode}
+                                onClick={() => handleSelectBook(book)}
+                              />
+                            </Grid>
+                          ))}
+                        </Grid>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                )}
 
-              {!loading && !error && books.length === 0 && hasSearched && (
-                <Box textAlign="center" mt={8}>
-                  <Typography variant="h6" color="text.secondary">
-                    No encontramos libros con esa búsqueda 😕
-                  </Typography>
-                </Box>
-              )}
+                {!loading && !error && books.length === 0 && hasSearched && (
+                  <Box textAlign="center" mt={8} aria-live="polite">
+                    <Typography variant="h6" color="text.secondary">
+                      No encontramos libros con esa búsqueda 😕
+                    </Typography>
+                  </Box>
+                )}
 
-              {!hasSearched && (
-                <Box textAlign="center" mt={8}>
-                  <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 500, mx: 'auto' }}>
-                    Busca por título, autor o ISBN para comenzar.
-                  </Typography>
-                </Box>
-              )}
-            </>
-          )}
+                {!hasSearched && (
+                  <Box textAlign="center" mt={8} aria-live="polite">
+                    <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 500, mx: 'auto' }}>
+                      Busca por título, autor o ISBN para comenzar.
+                    </Typography>
+                  </Box>
+                )}
+              </>
+            )}
+          </Box>
         </Container>
       </Box>
     </ThemeProvider>
