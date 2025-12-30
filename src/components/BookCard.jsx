@@ -1,39 +1,14 @@
 // src/components/BookCard.jsx
-import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   Card,
   CardContent,
   CardMedia,
   Typography,
-  IconButton,
   Box,
-  Tooltip,
 } from '@mui/material';
-import FavoriteIcon from '@mui/icons-material/Favorite';
-import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 
 export default function BookCard({ book, mode, onClick }) {
-  const [isFavorite, setIsFavorite] = useState(false);
-
-  useEffect(() => {
-    const favorites = JSON.parse(localStorage.getItem('book-favorites') || '[]');
-    setIsFavorite(favorites.some((fav) => fav.id === book.id));
-  }, [book.id]);
-
-  const toggleFavorite = (e) => {
-    e.stopPropagation();
-    const favorites = JSON.parse(localStorage.getItem('book-favorites') || '[]');
-    if (isFavorite) {
-      const filtered = favorites.filter((fav) => fav.id !== book.id);
-      localStorage.setItem('book-favorites', JSON.stringify(filtered));
-    } else {
-      favorites.push(book);
-      localStorage.setItem('book-favorites', JSON.stringify(favorites));
-    }
-    setIsFavorite(!isFavorite);
-  };
-
   const { volumeInfo } = book;
   const title = volumeInfo.title || 'Sin título';
   const authors = volumeInfo.authors?.join(', ') || 'Autor desconocido';
@@ -83,24 +58,6 @@ export default function BookCard({ book, mode, onClick }) {
           },
         }}
       >
-        <Box position="absolute" top={12} right={12} zIndex={2}>
-          <Tooltip title={isFavorite ? 'Quitar de favoritos' : 'Añadir a favoritos'}>
-            <IconButton
-              onClick={toggleFavorite}
-              color={isFavorite ? 'secondary' : 'default'}
-              size="small"
-              sx={{
-                bgcolor: mode === 'light' ? 'rgba(255,255,255,0.9)' : 'rgba(15,23,42,0.85)',
-                backdropFilter: 'blur(8px)',
-                boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
-              }}
-              aria-label={isFavorite ? `Quitar ${title} de favoritos` : `Añadir ${title} a favoritos`}
-            >
-              {isFavorite ? <FavoriteIcon /> : <FavoriteBorderIcon />}
-            </IconButton>
-          </Tooltip>
-        </Box>
-
         <CardMedia
           component="img"
           image={image || 'https://placehold.co/400x600/e2e8f0/64748b?text=Portada+no+disponible'}
