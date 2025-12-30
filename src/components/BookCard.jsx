@@ -15,7 +15,7 @@ import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 
-export default function BookCard({ book }) {
+export default function BookCard({ book, mode }) {
   const [isFavorite, setIsFavorite] = useState(false);
 
   useEffect(() => {
@@ -49,8 +49,8 @@ export default function BookCard({ book }) {
   return (
     <motion.div
       layout
-      whileHover={{ y: -8 }}
-      transition={{ type: 'spring', stiffness: 300 }}
+      whileHover={{ y: -6 }}
+      transition={{ type: 'spring', stiffness: 400, damping: 20 }}
     >
       <Card
         sx={{
@@ -67,9 +67,12 @@ export default function BookCard({ book }) {
               color={isFavorite ? 'secondary' : 'default'}
               size="small"
               sx={{
-                bgcolor: 'rgba(255,255,255,0.85)',
-                backdropFilter: 'blur(4px)',
-                '&:hover': { bgcolor: 'rgba(255,255,255,0.95)' },
+                bgcolor: mode === 'light' ? 'rgba(255,255,255,0.9)' : 'rgba(15,23,42,0.85)',
+                backdropFilter: 'blur(8px)',
+                boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
+                '&:hover': {
+                  bgcolor: mode === 'light' ? 'rgba(255,255,255,1)' : 'rgba(15,23,42,0.95)',
+                },
               }}
             >
               {isFavorite ? <FavoriteIcon /> : <FavoriteBorderIcon />}
@@ -79,45 +82,61 @@ export default function BookCard({ book }) {
 
         <CardMedia
           component="img"
-          image={image || 'https://via.placeholder.com/128x192?text=No+Cover'}
+          image={image || 'https://placehold.co/400x600/e2e8f0/64748b?text=No+Cover'}
           alt={title}
-          onError={(e) => (e.currentTarget.src = 'https://via.placeholder.com/128x192?text=No+Cover')}
+          onError={(e) => (e.currentTarget.src = 'https://placehold.co/400x600/e2e8f0/64748b?text=No+Cover')}
           sx={{
-            height: 220,
+            height: 280,
             objectFit: 'cover',
+            bgcolor: mode === 'light' ? '#f8fafc' : '#0f172a',
           }}
         />
-        <CardContent sx={{ flexGrow: 1, pt: 2 }}>
-          <Typography
-            variant="h6"
-            gutterBottom
-            sx={{
-              fontWeight: 600,
-              lineHeight: 1.3,
-              display: '-webkit-box',
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: 'vertical',
-              overflow: 'hidden',
-            }}
-          >
-            {title}
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
-            {authors}
-          </Typography>
+        <CardContent sx={{ p: 2.5, pt: 1 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1.5 }}>
+            <Typography
+              variant="h6"
+              sx={{
+                fontWeight: 700,
+                lineHeight: 1.3,
+                display: '-webkit-box',
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: 'vertical',
+                overflow: 'hidden',
+                flex: 1,
+                pr: 1,
+              }}
+            >
+              {title}
+            </Typography>
+          </Box>
+
           <Typography
             variant="body2"
-            color="text.primary"
             sx={{
+              color: mode === 'light' ? '#475569' : '#cbd5e1',
+              fontSize: '0.95rem',
+              mb: 2,
+            }}
+          >
+            {authors}
+          </Typography>
+
+          <Typography
+            variant="body2"
+            sx={{
+              color: mode === 'light' ? '#334155' : '#cbd5e1',
+              lineHeight: 1.6,
               display: '-webkit-box',
               WebkitLineClamp: 3,
               WebkitBoxOrient: 'vertical',
               overflow: 'hidden',
-              mb: 2,
+              fontSize: '0.97rem',
+              mb: 2.5,
             }}
           >
             {description}
           </Typography>
+
           {infoLink && (
             <Button
               variant="outlined"
@@ -125,13 +144,23 @@ export default function BookCard({ book }) {
               href={infoLink}
               target="_blank"
               rel="noopener"
-              endIcon={<OpenInNewIcon />}
+              endIcon={<OpenInNewIcon sx={{ fontSize: '1rem' }} />}
+              sx={{
+                borderColor: mode === 'light' ? '#cbd5e1' : '#334155',
+                color: mode === 'light' ? '#475569' : '#cbd5e1',
+                fontWeight: 600,
+                fontSize: '0.9rem',
+                '&:hover': {
+                  borderColor: mode === 'light' ? '#94a3b8' : '#64748b',
+                  bgcolor: mode === 'light' ? '#f1f5f9' : '#1e293b',
+                },
+              }}
             >
-              Ver libro
+              Ver en Google Books
             </Button>
           )}
         </CardContent>
       </Card>
     </motion.div>
   );
-                                 }
+}
