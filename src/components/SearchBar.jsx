@@ -11,7 +11,6 @@ export default function SearchBar({ onSearch }) {
   const [options, setOptions] = useState([]);
   const [open, setOpen] = useState(false);
 
-  // Autocompletado
   useEffect(() => {
     if (inputValue.length < 2) {
       setOptions([]);
@@ -24,7 +23,7 @@ export default function SearchBar({ onSearch }) {
         const suggestions = (res.data.items || []).map((item) => ({
           label: `${item.volumeInfo.title || 'Sin título'}${item.volumeInfo.authors ? ' – ' + item.volumeInfo.authors[0] : ''}`,
           value: item.volumeInfo.title || inputValue,
-          raw: item, // ← Guardamos el libro completo para usarlo al seleccionar
+          raw: item,
         }));
         setOptions(suggestions);
       } catch (err) {
@@ -46,13 +45,10 @@ export default function SearchBar({ onSearch }) {
     }
   };
 
-  // ✅ Nueva función: al seleccionar una opción del autocompletado → buscar inmediatamente
   const handleAutocompleteChange = (event, value) => {
     if (value && value.raw) {
-      // Si es un objeto de sugerencia (con "raw"), buscamos por el título
       onSearch(value.raw.volumeInfo.title);
     } else if (typeof value === 'string') {
-      // Si es texto libre
       setInputValue(value);
     }
   };
@@ -81,7 +77,7 @@ export default function SearchBar({ onSearch }) {
         onInputChange={(e, newInput) => {
           setInputValue(newInput);
         }}
-        onChange={handleAutocompleteChange} // ✅ ¡Esto hace la magia!
+        onChange={handleAutocompleteChange}
         sx={{ width: '100%', maxWidth: 500 }}
         renderInput={(params) => (
           <TextField
