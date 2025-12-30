@@ -49,7 +49,7 @@ export default function SearchBar({ onSearch }) {
     <Box
       component="form"
       onSubmit={handleSubmit}
-      sx={{ width: '100%', maxWidth: 700, mx: 'auto', mb: 6 }}
+      sx={{ width: '100%, maxWidth: 700', mx: 'auto', mb: 6 }}
     >
       <Autocomplete
         freeSolo
@@ -87,4 +87,4 @@ export default function SearchBar({ onSearch }) {
       />
     </Box>
   );
-}
+      }
