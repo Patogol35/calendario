@@ -71,22 +71,7 @@ export default function App() {
       <CssBaseline />
       <Box sx={{ minHeight: '100vh', position: 'relative', pb: 6 }}>
         {/* Skip link para accesibilidad (opcional avanzado) */}
-        <a
-          href="#main-content"
-          style={{
-            position: 'absolute',
-            top: 10,
-            left: 10,
-            backgroundColor: '#000',
-            color: '#fff',
-            padding: 8,
-            borderRadius: 4,
-            textDecoration: 'none',
-            zIndex: 1300,
-          }}
-        >
-          Ir al contenido principal
-        </a>
+        
 
         {/* Botón de modo */}
         <IconButton
