@@ -64,7 +64,6 @@ export default function Calendar2026() {
 
   return (
     <Box>
-      {/* TITULO MEJORADO */}
       {/* TITULO */}
 <Box textAlign="center" mb={5}>
   <Typography
@@ -81,17 +80,11 @@ export default function Calendar2026() {
   </Typography>
 
   <Typography
-    sx={{
-      mt: 1,
-      fontSize: 14,
-      color: "text.secondary",
-      letterSpacing: 0.6,
-    }}
+    textAlign="center"
+    color="text.secondary"
+    sx={{ mt: 1 }}
   >
-    Autor ·{" "}
-    <Box component="span" fontWeight={600} color="text.primary">
-      Jorge Patricio Santamaría Cherrez
-    </Box>
+    Autor · Jorge Patricio Santamaría Cherrez
   </Typography>
 </Box>
 
