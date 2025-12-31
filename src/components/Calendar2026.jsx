@@ -64,35 +64,29 @@ export default function Calendar2026() {
 
   return (
     <Box>
-      {/* TITULO MEJORADO */}
-      <Box textAlign="center" mb={5}>
-        <Typography
-          variant="h3"
-          fontWeight={900}
-          letterSpacing={1}
-        >
-          Calendario
-        </Typography>
+{/* TITULO */}
+<Box textAlign="center" mb={5}>
+  <Typography
+    variant="h3"
+    fontWeight={900}
+    sx={{
+      background: "linear-gradient(135deg,#1e40af,#2563eb)",
+      WebkitBackgroundClip: "text",
+      WebkitTextFillColor: "transparent",
+      letterSpacing: 1.2,
+    }}
+  >
+    Calendario
+  </Typography>
 
-        <Box
-          sx={{
-            width: 80,
-            height: 3,
-            bgcolor: "#2563eb",
-            mx: "auto",
-            my: 1.5,
-            borderRadius: 2,
-          }}
-        />
-
-        <Typography
-          fontSize={14}
-          color="text.secondary"
-          sx={{ letterSpacing: 0.5 }}
-        >
-          Autor · Jorge Patricio Santamaría Cherrez
-        </Typography>
-      </Box>
+  <Typography
+    textAlign="center"
+    color="text.secondary"
+    sx={{ mt: 1 }}
+  >
+    Autor · Jorge Patricio Santamaría Cherrez
+  </Typography>
+</Box>
 
       <Paper
         elevation={10}
