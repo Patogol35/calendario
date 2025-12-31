@@ -17,19 +17,13 @@ const MONTHS = [
 
 const DAYS = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
 
-function getCalendar(year, month) {
-  const firstDay = new Date(year, month, 1).getDay(); // 0 = domingo
+function buildCalendar(year, month) {
+  const firstDay = new Date(year, month, 1).getDay(); // 0=Domingo
   const daysInMonth = new Date(year, month + 1, 0).getDate();
 
   const cells = [];
-
-  for (let i = 0; i < firstDay; i++) {
-    cells.push(null);
-  }
-
-  for (let d = 1; d <= daysInMonth; d++) {
-    cells.push(d);
-  }
+  for (let i = 0; i < firstDay; i++) cells.push(null);
+  for (let d = 1; d <= daysInMonth; d++) cells.push(d);
 
   return cells;
 }
@@ -39,7 +33,7 @@ export default function Calendar2026() {
   const year = 2026;
   const today = new Date();
 
-  const calendar = getCalendar(year, month);
+  const calendar = buildCalendar(year, month);
 
   return (
     <Box>
@@ -48,7 +42,7 @@ export default function Calendar2026() {
         variant="h3"
         textAlign="center"
         fontWeight={800}
-        mb={1}
+        mb={0.5}
       >
         Calendario 2026
       </Typography>
@@ -62,7 +56,7 @@ export default function Calendar2026() {
       </Typography>
 
       <Paper
-        elevation={6}
+        elevation={4}
         sx={{
           maxWidth: 900,
           mx: "auto",
@@ -89,7 +83,7 @@ export default function Calendar2026() {
           </IconButton>
         </Box>
 
-        {/* DAYS HEADER */}
+        {/* DÍAS */}
         <Grid container mb={1}>
           {DAYS.map(d => (
             <Grid item xs={12 / 7} key={d}>
@@ -104,7 +98,7 @@ export default function Calendar2026() {
           ))}
         </Grid>
 
-        {/* CALENDAR GRID */}
+        {/* CALENDARIO */}
         <Grid container>
           {calendar.map((day, index) => {
             const isToday =
@@ -113,6 +107,8 @@ export default function Calendar2026() {
               today.getMonth() === month &&
               today.getDate() === day;
 
+            const isWeekend = index % 7 === 0 || index % 7 === 6;
+
             return (
               <Grid item xs={12 / 7} key={index}>
                 <Box
@@ -120,12 +116,18 @@ export default function Calendar2026() {
                     height: 90,
                     border: "1px solid",
                     borderColor: "divider",
-                    display: "flex",
-                    alignItems: "flex-start",
-                    justifyContent: "flex-end",
                     p: 1.5,
-                    bgcolor: isToday ? "primary.main" : "background.paper",
-                    color: isToday ? "primary.contrastText" : "text.primary",
+                    bgcolor: isToday
+                      ? "primary.main"
+                      : isWeekend
+                      ? "action.hover"
+                      : "background.paper",
+                    color: isToday
+                      ? "primary.contrastText"
+                      : "text.primary",
+                    display: "flex",
+                    justifyContent: "flex-end",
+                    alignItems: "flex-start",
                   }}
                 >
                   {day && (
