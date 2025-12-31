@@ -42,6 +42,12 @@ function getCalendar(year, month) {
   return cells;
 }
 
+const isSameDate = (y, m, d, date) =>
+  d &&
+  date.getFullYear() === y &&
+  date.getMonth() === m &&
+  date.getDate() === d;
+
 /* =========================
    COMPONENTE
 ========================= */
@@ -50,14 +56,21 @@ export default function Calendar2026() {
   const [selectedDay, setSelectedDay] = useState(null);
 
   const year = 2026;
-  const today = new Date(); // Fecha real actual (ej. 2025-12-31)
+  const today = new Date();
   const calendar = getCalendar(year, month);
+
+  const dayName = today.toLocaleDateString("es-ES", { weekday: "long" });
+  const monthName = MONTHS[today.getMonth()];
 
   return (
     <Box>
-      {/* TÍTULO MEJORADO */}
+      {/* TITULO MEJORADO */}
       <Box textAlign="center" mb={5}>
-        <Typography variant="h3" fontWeight={900} letterSpacing={1}>
+        <Typography
+          variant="h3"
+          fontWeight={900}
+          letterSpacing={1}
+        >
           Calendario
         </Typography>
 
@@ -72,7 +85,11 @@ export default function Calendar2026() {
           }}
         />
 
-        <Typography fontSize={14} color="text.secondary" sx={{ letterSpacing: 0.5 }}>
+        <Typography
+          fontSize={14}
+          color="text.secondary"
+          sx={{ letterSpacing: 0.5 }}
+        >
           Autor · Jorge Patricio Santamaría Cherrez
         </Typography>
       </Box>
@@ -86,7 +103,7 @@ export default function Calendar2026() {
           overflow: "hidden",
         }}
       >
-        {/* HEADER AZUL — ahora coherente con el mes/áño mostrado */}
+        {/* HEADER AZUL */}
         <Box
           sx={{
             background: "linear-gradient(135deg,#1e3a8a,#2563eb)",
@@ -95,14 +112,14 @@ export default function Calendar2026() {
           }}
         >
           <Typography sx={{ textTransform: "capitalize", opacity: 0.9 }}>
-            {MONTHS[month]} · {year}
+            {dayName} · {today.getDate()}
           </Typography>
           <Typography variant="h5" fontWeight={800}>
-            {MONTHS[month]} {year}
+            {monthName} {year}
           </Typography>
         </Box>
 
-        {/* NAVIGACIÓN DE MES */}
+        {/* MES */}
         <Box
           display="flex"
           alignItems="center"
@@ -110,7 +127,7 @@ export default function Calendar2026() {
           px={2}
           py={1.5}
         >
-          <IconButton onClick={() => setMonth((m) => (m === 0 ? 11 : m - 1))}>
+          <IconButton onClick={() => setMonth(m => (m === 0 ? 11 : m - 1))}>
             <ChevronLeftIcon />
           </IconButton>
 
@@ -118,12 +135,12 @@ export default function Calendar2026() {
             {MONTHS[month]} {year}
           </Typography>
 
-          <IconButton onClick={() => setMonth((m) => (m === 11 ? 0 : m + 1))}>
+          <IconButton onClick={() => setMonth(m => (m === 11 ? 0 : m + 1))}>
             <ChevronRightIcon />
           </IconButton>
         </Box>
 
-        {/* CABECERAS DE DÍAS */}
+        {/* DIAS */}
         <Box
           px={2}
           sx={{
@@ -134,7 +151,11 @@ export default function Calendar2026() {
           }}
         >
           {DAYS.map((d) => (
-            <Typography key={d} fontSize={12} color="text.secondary">
+            <Typography
+              key={d}
+              fontSize={12}
+              color="text.secondary"
+            >
               {d}
             </Typography>
           ))}
@@ -159,19 +180,9 @@ export default function Calendar2026() {
               }}
             >
               {calendar.map((day, index) => {
-                if (day === null) {
-                  return <Box key={index} />;
-                }
-
                 const col = index % 7;
                 const isWeekend = col >= 5;
-
-                // ✅ Solo es "hoy" si coincide EXACTAMENTE con la fecha real (año, mes, día)
-                const isToday =
-                  year === today.getFullYear() &&
-                  month === today.getMonth() &&
-                  day === today.getDate();
-
+                const isToday = isSameDate(year, month, day, today);
                 const isSelected = day === selectedDay;
 
                 const key = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
@@ -187,47 +198,49 @@ export default function Calendar2026() {
                       justifyContent: "center",
                     }}
                   >
-                    <Tooltip title={special || ""}>
-                      <Box
-                        onClick={() => setSelectedDay(day)}
-                        sx={{
-                          width: 34,
-                          height: 34,
-                          borderRadius: 2,
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          cursor: "pointer",
-                          bgcolor: isSelected
-                            ? "#1e40af"
-                            : isToday
-                            ? "#2563eb"
-                            : "transparent",
-                          color: isSelected || isToday
-                            ? "#fff"
-                            : isWeekend
-                            ? "#64748b"
-                            : "text.primary",
-                          fontWeight: isToday || isSelected ? 700 : 400,
-                          position: "relative",
-                        }}
-                      >
-                        {day}
+                    {day && (
+                      <Tooltip title={special || ""}>
+                        <Box
+                          onClick={() => setSelectedDay(day)}
+                          sx={{
+                            width: 34,
+                            height: 34,
+                            borderRadius: 2,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            cursor: "pointer",
+                            bgcolor: isSelected
+                              ? "#1e40af"
+                              : isToday
+                              ? "#2563eb"
+                              : "transparent",
+                            color: isSelected || isToday
+                              ? "#fff"
+                              : isWeekend
+                              ? "#64748b"
+                              : "text.primary",
+                            fontWeight: isToday || isSelected ? 700 : 400,
+                            position: "relative",
+                          }}
+                        >
+                          {day}
 
-                        {special && (
-                          <Box
-                            sx={{
-                              width: 6,
-                              height: 6,
-                              borderRadius: "50%",
-                              bgcolor: "#38bdf8",
-                              position: "absolute",
-                              bottom: 4,
-                            }}
-                          />
-                        )}
-                      </Box>
-                    </Tooltip>
+                          {special && (
+                            <Box
+                              sx={{
+                                width: 6,
+                                height: 6,
+                                borderRadius: "50%",
+                                bgcolor: "#38bdf8",
+                                position: "absolute",
+                                bottom: 4,
+                              }}
+                            />
+                          )}
+                        </Box>
+                      </Tooltip>
+                    )}
                   </Box>
                 );
               })}
@@ -237,4 +250,4 @@ export default function Calendar2026() {
       </Paper>
     </Box>
   );
-                                                      }
+            }
