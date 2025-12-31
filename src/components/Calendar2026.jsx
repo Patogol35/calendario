@@ -8,7 +8,9 @@ import {
 } from "@mui/material";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import FiberManualRecordIcon from "@mui/icons-material/FiberManualRecord";
 import EventIcon from "@mui/icons-material/Event";
+import StarIcon from "@mui/icons-material/Star";
 import { motion, AnimatePresence } from "framer-motion";
 
 /* =========================
@@ -162,14 +164,13 @@ export default function Calendar2026() {
               sx={{
                 display: "grid",
                 gridTemplateColumns: "repeat(7, 1fr)",
-                rowGap: 8,
+                rowGap: 10,
               }}
             >
               {calendar.map((day, index) => {
                 const col = index % 7;
                 const isSaturday = col === 5;
                 const isSunday = col === 6;
-                const isWeekend = isSaturday || isSunday;
                 const isToday = isSameDate(year, month, day, today);
                 const isSelected = day === selectedDay;
 
@@ -180,19 +181,19 @@ export default function Calendar2026() {
                   <Box
                     key={index}
                     sx={{
-                      height: 52,
+                      height: 56,
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
                     }}
                   >
                     {day && (
-                      <Tooltip title={special || (isWeekend ? "Fin de semana" : "")}>
+                      <Tooltip title={special || "Día"}>
                         <Box
                           onClick={() => setSelectedDay(day)}
                           sx={{
-                            width: 38,
-                            height: 38,
+                            width: 42,
+                            height: 42,
                             borderRadius: 2,
                             display: "flex",
                             flexDirection: "column",
@@ -204,9 +205,9 @@ export default function Calendar2026() {
                               : isToday
                               ? "#2563eb"
                               : isSunday
-                              ? "rgba(239,68,68,.15)"
+                              ? "rgba(239,68,68,.12)"
                               : isSaturday
-                              ? "rgba(37,99,235,.15)"
+                              ? "rgba(37,99,235,.12)"
                               : "transparent",
                             color: isSelected || isToday
                               ? "#fff"
@@ -214,28 +215,22 @@ export default function Calendar2026() {
                               ? "#dc2626"
                               : isSaturday
                               ? "#2563eb"
-                              : "text.primary",
+                              : "#1e293b",
                             fontWeight: 600,
-                            position: "relative",
+                            transition: "all .2s",
+                            "&:hover": {
+                              bgcolor: "rgba(37,99,235,.15)",
+                            },
                           }}
                         >
                           <Typography fontSize={14}>{day}</Typography>
 
-                          {isWeekend && (
-                            <EventIcon sx={{ fontSize: 12, mt: -0.3 }} />
-                          )}
-
-                          {special && (
-                            <Box
-                              sx={{
-                                width: 6,
-                                height: 6,
-                                borderRadius: "50%",
-                                bgcolor: "#38bdf8",
-                                position: "absolute",
-                                bottom: 4,
-                              }}
-                            />
+                          {special ? (
+                            <StarIcon sx={{ fontSize: 12 }} />
+                          ) : isSaturday || isSunday ? (
+                            <EventIcon sx={{ fontSize: 12 }} />
+                          ) : (
+                            <FiberManualRecordIcon sx={{ fontSize: 8 }} />
                           )}
                         </Box>
                       </Tooltip>
@@ -249,4 +244,4 @@ export default function Calendar2026() {
       </Paper>
     </Box>
   );
-            }
+}
