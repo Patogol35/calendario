@@ -15,143 +15,137 @@ const MONTHS = [
   "Septiembre", "Octubre", "Noviembre", "Diciembre",
 ];
 
-const DAYS_SHORT = ["D", "L", "M", "M", "J", "V", "S"]; // D L M M J V S
+const DAYS = ["D", "L", "M", "M", "J", "V", "S"];
 
-function buildCalendar(year, month) {
-  const firstDayOfMonth = new Date(year, month, 1).getDay(); // 0=Domingo, 6=Sábado
+function getCalendar(year, month) {
+  const firstDay = new Date(year, month, 1).getDay();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
 
   const cells = [];
-
-  // Rellenar con espacios vacíos hasta el primer día del mes
-  for (let i = 0; i < firstDayOfMonth; i++) {
-    cells.push(null);
-  }
-
-  // Agregar los días del mes
-  for (let d = 1; d <= daysInMonth; d++) {
-    cells.push(d);
-  }
+  for (let i = 0; i < firstDay; i++) cells.push(null);
+  for (let d = 1; d <= daysInMonth; d++) cells.push(d);
 
   return cells;
 }
 
 export default function Calendar2026() {
-  const [month, setMonth] = useState(0); // Enero por defecto
+  const [month, setMonth] = useState(0);
   const year = 2026;
   const today = new Date();
 
-  const calendar = buildCalendar(year, month);
-
-  // Función para saber si un día es hoy
-  const isToday = (day) => {
-    return (
-      day &&
-      today.getFullYear() === year &&
-      today.getMonth() === month &&
-      today.getDate() === day
-    );
-  };
-
-  // Formatear fecha actual para encabezado rojo
-  const todayFormatted = today.toLocaleDateString("es-ES", {
-    weekday: "short",
-    day: "numeric",
-    month: "short",
-  }).replace(".", "").replace(",", "");
+  const calendar = getCalendar(year, month);
 
   return (
-    <Box sx={{ p: 2, maxWidth: 400, mx: "auto" }}>
-      {/* ENCABEZADO ROJO */}
+    <Paper
+      elevation={6}
+      sx={{
+        maxWidth: 420,
+        mx: "auto",
+        overflow: "hidden",
+        borderRadius: 2,
+      }}
+    >
+      {/* HEADER ROJO */}
       <Box
         sx={{
-          bgcolor: "#d32f2f", // Rojo como en tu ejemplo
-          color: "white",
-          p: 2,
-          borderRadius: "8px 8px 0 0",
-          textAlign: "center",
+          bgcolor: "#c62828",
+          color: "#fff",
+          p: 3,
         }}
       >
-        <Typography variant="h6" fontWeight={500}>
-          {today.getFullYear()}
+        <Typography variant="caption" sx={{ opacity: 0.8 }}>
+          {year}
         </Typography>
+
         <Typography variant="h4" fontWeight={700}>
-          {todayFormatted}
+          {DAYS[today.getDay()]}, {today.getDate()} de{" "}
+          {MONTHS[today.getMonth()].slice(0, 3)}.
         </Typography>
       </Box>
 
-      {/* CALENDARIO */}
-      <Paper
-        elevation={0}
-        sx={{
-          p: 2,
-          borderRadius: "0 0 8px 8px",
-          bgcolor: "background.paper",
-          border: "1px solid #e0e0e0",
-        }}
+      {/* MES */}
+      <Box
+        display="flex"
+        alignItems="center"
+        justifyContent="space-between"
+        px={2}
+        py={1.5}
       >
-        {/* HEADER DE MES */}
-        <Box
-          display="flex"
-          alignItems="center"
-          justifyContent="space-between"
-          mb={2}
+        <IconButton
+          size="small"
+          onClick={() => setMonth(m => (m === 0 ? 11 : m - 1))}
         >
-          <IconButton onClick={() => setMonth((m) => (m === 0 ? 11 : m - 1))}>
-            <ChevronLeftIcon />
-          </IconButton>
+          <ChevronLeftIcon />
+        </IconButton>
 
-          <Typography variant="h6" fontWeight={600}>
-            {MONTHS[month]} de {year}
-          </Typography>
+        <Typography fontWeight={600}>
+          {MONTHS[month]} {year}
+        </Typography>
 
-          <IconButton onClick={() => setMonth((m) => (m === 11 ? 0 : m + 1))}>
-            <ChevronRightIcon />
-          </IconButton>
-        </Box>
+        <IconButton
+          size="small"
+          onClick={() => setMonth(m => (m === 11 ? 0 : m + 1))}
+        >
+          <ChevronRightIcon />
+        </IconButton>
+      </Box>
 
-        {/* CABECERA DE DÍAS */}
-        <Grid container spacing={0.5} mb={1}>
-          {DAYS_SHORT.map((d, i) => (
+      {/* DÍAS */}
+      <Grid container px={2}>
+        {DAYS.map(d => (
+          <Grid item xs={12 / 7} key={d}>
+            <Typography
+              align="center"
+              fontSize={12}
+              color="text.secondary"
+            >
+              {d}
+            </Typography>
+          </Grid>
+        ))}
+      </Grid>
+
+      {/* CALENDARIO */}
+      <Grid container px={2} pb={2}>
+        {calendar.map((day, i) => {
+          const isToday =
+            day &&
+            today.getFullYear() === year &&
+            today.getMonth() === month &&
+            today.getDate() === day;
+
+          return (
             <Grid item xs={12 / 7} key={i}>
-              <Typography
-                align="center"
-                fontSize="0.9rem"
-                color="text.secondary"
-                fontWeight={600}
-              >
-                {d}
-              </Typography>
-            </Grid>
-          ))}
-        </Grid>
-
-        {/* CUADRÍCULA DE DÍAS */}
-        <Grid container spacing={0.5}>
-          {calendar.map((day, index) => (
-            <Grid item xs={12 / 7} key={index}>
               <Box
                 sx={{
-                  height: 50,
+                  height: 48,
                   display: "flex",
-                  justifyContent: "center",
                   alignItems: "center",
-                  borderRadius: 1,
-                  bgcolor: isToday(day)
-                    ? "#1976d2" // Azul como en tu ejemplo si quieres resaltar hoy
-                    : "transparent",
-                  color: isToday(day)
-                    ? "white"
-                    : "text.primary",
-                  fontWeight: isToday(day) ? 700 : 400,
+                  justifyContent: "center",
                 }}
               >
-                {day && <Typography>{day}</Typography>}
+                {day && (
+                  <Box
+                    sx={{
+                      width: 32,
+                      height: 32,
+                      borderRadius: "50%",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      bgcolor: isToday ? "#c62828" : "transparent",
+                      color: isToday ? "#fff" : "text.primary",
+                      fontWeight: isToday ? 700 : 400,
+                    }}
+                  >
+                    {day}
+                  </Box>
+                )}
               </Box>
             </Grid>
-          ))}
-        </Grid>
-      </Paper>
-    </Box>
+          );
+        })}
+      </Grid>
+    </Paper>
   );
-}
+        }
