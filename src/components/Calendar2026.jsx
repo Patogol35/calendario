@@ -6,6 +6,7 @@ import {
   IconButton,
   Grid,
   useTheme,
+  useMediaQuery,
 } from "@mui/material";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
@@ -19,27 +20,19 @@ const MONTHS = [
 const DAYS = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
 
 function buildCalendar(year, month) {
-  const firstDay = new Date(year, month, 1).getDay(); // 0 = Domingo
+  const firstDayOfMonth = new Date(year, month, 1).getDay(); // 0 = Domingo
   const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const prevMonthDays = new Date(year, month, 0).getDate();
 
   const cells = [];
 
-  // Días del mes anterior (vacíos pero visibles como números grises si se quiere)
-  for (let i = firstDay - 1; i >= 0; i--) {
-    cells.push({ day: prevMonthDays - i, isCurrentMonth: false });
+  // Rellenar con espacios vacíos hasta el primer día del mes
+  for (let i = 0; i < firstDayOfMonth; i++) {
+    cells.push(null);
   }
 
-  // Días del mes actual
+  // Agregar los días del mes
   for (let d = 1; d <= daysInMonth; d++) {
-    cells.push({ day: d, isCurrentMonth: true });
-  }
-
-  // Días del siguiente mes (opcional: rellenar hasta 6 semanas → 42 celdas)
-  const totalCells = 42; // 6 semanas
-  const remaining = totalCells - cells.length;
-  for (let d = 1; d <= remaining; d++) {
-    cells.push({ day: d, isCurrentMonth: false });
+    cells.push(d);
   }
 
   return cells;
@@ -50,18 +43,25 @@ export default function Calendar2026() {
   const year = 2026;
   const today = new Date();
   const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   const calendar = buildCalendar(year, month);
+
+  // Obtener el nombre del día de la semana para el 1ro del mes
+  const firstDayName = DAYS[new Date(year, month, 1).getDay()];
+  const lastDay = new Date(year, month + 1, 0).getDate();
+  const lastDayOfWeek = new Date(year, month, lastDay).getDay();
 
   return (
     <Box>
       {/* TÍTULO */}
       <Typography
-        variant="h3"
+        variant="h2"
         textAlign="center"
         fontWeight={800}
         mb={0.5}
         color="primary"
+        sx={{ fontSize: { xs: "2rem", sm: "2.5rem" } }}
       >
         Calendario 2026
       </Typography>
@@ -70,17 +70,20 @@ export default function Calendar2026() {
         textAlign="center"
         color="text.secondary"
         mb={4}
+        sx={{ fontSize: { xs: "0.9rem", sm: "1rem" } }}
       >
         Autor: Jorge Patricio Santamaría Cherrez
       </Typography>
 
       <Paper
-        elevation={4}
+        elevation={6}
         sx={{
           maxWidth: 900,
           mx: "auto",
-          p: { xs: 2, sm: 3 },
-          borderRadius: 3,
+          p: { xs: 2, sm: 4 },
+          borderRadius: 4,
+          backgroundColor: theme.palette.background.default,
+          boxShadow: "0 8px 32px rgba(0, 0, 0, 0.08)",
         }}
       >
         {/* HEADER */}
@@ -89,35 +92,57 @@ export default function Calendar2026() {
           alignItems="center"
           justifyContent="space-between"
           mb={3}
+          sx={{ gap: 1 }}
         >
           <IconButton
             onClick={() => setMonth((m) => (m === 0 ? 11 : m - 1))}
             size="large"
+            sx={{
+              bgcolor: theme.palette.action.hover,
+              "&:hover": { bgcolor: theme.palette.action.selected },
+            }}
           >
-            <ChevronLeftIcon fontSize="large" />
+            <ChevronLeftIcon fontSize="medium" />
           </IconButton>
 
-          <Typography variant="h5" fontWeight={700} sx={{ flexGrow: 1, textAlign: 'center' }}>
+          <Typography
+            variant="h5"
+            fontWeight={700}
+            sx={{
+              flexGrow: 1,
+              textAlign: 'center',
+              fontSize: { xs: "1.2rem", sm: "1.5rem" },
+            }}
+          >
             {MONTHS[month]} {year}
           </Typography>
 
           <IconButton
             onClick={() => setMonth((m) => (m === 11 ? 0 : m + 1))}
             size="large"
+            sx={{
+              bgcolor: theme.palette.action.hover,
+              "&:hover": { bgcolor: theme.palette.action.selected },
+            }}
           >
-            <ChevronRightIcon fontSize="large" />
+            <ChevronRightIcon fontSize="medium" />
           </IconButton>
         </Box>
 
         {/* CABECERAS DE DÍAS */}
-        <Grid container mb={1.5}>
+        <Grid container mb={2}>
           {DAYS.map((d) => (
             <Grid item xs={12 / 7} key={d}>
               <Typography
                 align="center"
                 fontWeight={700}
-                color="text.disabled"
-                sx={{ fontSize: { xs: "0.875rem", sm: "1rem" } }}
+                color="text.secondary"
+                sx={{
+                  fontSize: { xs: "0.85rem", sm: "1rem" },
+                  py: 1,
+                  borderRadius: 1,
+                  bgcolor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.03)",
+                }}
               >
                 {d}
               </Typography>
@@ -127,9 +152,9 @@ export default function Calendar2026() {
 
         {/* CALENDARIO */}
         <Grid container spacing={0.5}>
-          {calendar.map(({ day, isCurrentMonth }, index) => {
+          {calendar.map((day, index) => {
             const isToday =
-              isCurrentMonth &&
+              day &&
               today.getFullYear() === year &&
               today.getMonth() === month &&
               today.getDate() === day;
@@ -140,31 +165,37 @@ export default function Calendar2026() {
               <Grid item xs={12 / 7} key={index}>
                 <Box
                   sx={{
-                    height: { xs: 48, sm: 64 },
-                    borderRadius: 1.5,
+                    height: { xs: 60, sm: 72 },
+                    borderRadius: 2,
                     display: "flex",
                     justifyContent: "center",
                     alignItems: "center",
                     bgcolor: isToday
                       ? theme.palette.primary.main
-                      : isCurrentMonth
-                        ? isWeekend
-                          ? "rgba(0, 0, 0, 0.04)"
-                          : "background.paper"
-                        : "transparent",
+                      : isWeekend
+                        ? theme.palette.mode === "dark"
+                          ? "rgba(255,255,255,0.08)"
+                          : "rgba(0,0,0,0.04)"
+                        : theme.palette.background.paper,
                     color: isToday
                       ? theme.palette.primary.contrastText
-                      : isCurrentMonth
-                        ? theme.palette.text.primary
-                        : theme.palette.text.disabled,
+                      : theme.palette.text.primary,
                     border: isToday
                       ? `2px solid ${theme.palette.primary.dark}`
                       : "none",
-                    fontWeight: isToday ? 700 : isCurrentMonth ? 500 : 400,
+                    fontWeight: isToday ? 700 : 500,
                     fontSize: { xs: "0.9rem", sm: "1rem" },
+                    transition: "all 0.2s ease",
+                    "&:hover": !isToday && {
+                      transform: "scale(1.05)",
+                      boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+                      bgcolor: theme.palette.mode === "dark"
+                        ? "rgba(255,255,255,0.1)"
+                        : "rgba(0,0,0,0.06)",
+                    },
                   }}
                 >
-                  {day}
+                  {day && <Typography>{day}</Typography>}
                 </Box>
               </Grid>
             );
@@ -173,4 +204,4 @@ export default function Calendar2026() {
       </Paper>
     </Box>
   );
-                    }
+}
