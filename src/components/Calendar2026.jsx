@@ -8,9 +8,11 @@ import {
 } from "@mui/material";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import FiberManualRecordIcon from "@mui/icons-material/FiberManualRecord";
-import EventIcon from "@mui/icons-material/Event";
-import StarIcon from "@mui/icons-material/Star";
+import TodayIcon from "@mui/icons-material/Today";
+import WeekendIcon from "@mui/icons-material/Weekend";
+import BeachAccessIcon from "@mui/icons-material/BeachAccess";
+import CelebrationIcon from "@mui/icons-material/Celebration";
+import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
 import { motion, AnimatePresence } from "framer-motion";
 
 /* =========================
@@ -177,6 +179,16 @@ export default function Calendar2026() {
                 const key = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
                 const special = SPECIAL_DAYS[key];
 
+                const Icon = special
+                  ? CelebrationIcon
+                  : isToday
+                  ? TodayIcon
+                  : isSunday
+                  ? BeachAccessIcon
+                  : isSaturday
+                  ? WeekendIcon
+                  : DragIndicatorIcon;
+
                 return (
                   <Box
                     key={index}
@@ -188,7 +200,7 @@ export default function Calendar2026() {
                     }}
                   >
                     {day && (
-                      <Tooltip title={special || "Día"}>
+                      <Tooltip title={special || "Día del calendario"}>
                         <Box
                           onClick={() => setSelectedDay(day)}
                           sx={{
@@ -218,20 +230,10 @@ export default function Calendar2026() {
                               : "#1e293b",
                             fontWeight: 600,
                             transition: "all .2s",
-                            "&:hover": {
-                              bgcolor: "rgba(37,99,235,.15)",
-                            },
                           }}
                         >
                           <Typography fontSize={14}>{day}</Typography>
-
-                          {special ? (
-                            <StarIcon sx={{ fontSize: 12 }} />
-                          ) : isSaturday || isSunday ? (
-                            <EventIcon sx={{ fontSize: 12 }} />
-                          ) : (
-                            <FiberManualRecordIcon sx={{ fontSize: 8 }} />
-                          )}
+                          <Icon sx={{ fontSize: 13 }} />
                         </Box>
                       </Tooltip>
                     )}
