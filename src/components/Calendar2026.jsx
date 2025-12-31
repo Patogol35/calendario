@@ -56,7 +56,7 @@ export default function Calendar2026() {
   const [selectedDay, setSelectedDay] = useState(null);
 
   const year = 2026;
-  const today = new Date();
+  const today = null;
   const calendar = getCalendar(year, month);
 
   const dayName = today.toLocaleDateString("es-ES", { weekday: "long" });
@@ -176,9 +176,7 @@ export default function Calendar2026() {
               {calendar.map((day, index) => {
                 const col = index % 7;
                 const isWeekend = col >= 5;
-                const isToday =
-  today.getFullYear() === year &&
-  isSameDate(year, month, day, today);
+                const isToday = false;
                 const isSelected = day === selectedDay;
 
                 const key = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
