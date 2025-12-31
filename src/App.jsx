@@ -18,11 +18,11 @@ export default function App() {
     palette: {
       mode,
       primary: {
-        main: "#1976d2",
+        main: "#2563eb",
       },
     },
     shape: {
-      borderRadius: 10,
+      borderRadius: 8,
     },
     typography: {
       fontFamily: "Inter, Roboto, sans-serif",
@@ -33,7 +33,6 @@ export default function App() {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Container maxWidth="lg" sx={{ py: 4 }}>
-        {/* TOGGLE */}
         <Box display="flex" justifyContent="flex-end" mb={2}>
           <IconButton onClick={() => setMode(m => m === "light" ? "dark" : "light")}>
             {mode === "light" ? <Brightness4Icon /> : <Brightness7Icon />}
