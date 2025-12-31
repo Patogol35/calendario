@@ -6,7 +6,6 @@ import {
   IconButton,
   Grid,
   useTheme,
-  useMediaQuery,
 } from "@mui/material";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
@@ -17,7 +16,7 @@ const MONTHS = [
   "Septiembre", "Octubre", "Noviembre", "Diciembre",
 ];
 
-const DAYS = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
+const DAYS_SHORT = ["D", "L", "M", "M", "J", "V", "S"]; // Día de la semana abreviado
 
 function buildCalendar(year, month) {
   const firstDayOfMonth = new Date(year, month, 1).getDay(); // 0 = Domingo
@@ -25,7 +24,7 @@ function buildCalendar(year, month) {
 
   const cells = [];
 
-  // Rellenar con espacios vacíos hasta el primer día del mes
+  // Rellenar espacios vacíos hasta el primer día del mes
   for (let i = 0; i < firstDayOfMonth; i++) {
     cells.push(null);
   }
@@ -39,110 +38,89 @@ function buildCalendar(year, month) {
 }
 
 export default function Calendar2026() {
-  const [month, setMonth] = useState(0);
+  const [month, setMonth] = useState(0); // Enero por defecto
   const year = 2026;
   const today = new Date();
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   const calendar = buildCalendar(year, month);
 
-  // Obtener el nombre del día de la semana para el 1ro del mes
-  const firstDayName = DAYS[new Date(year, month, 1).getDay()];
-  const lastDay = new Date(year, month + 1, 0).getDate();
-  const lastDayOfWeek = new Date(year, month, lastDay).getDay();
+  // Calcular qué día es hoy en el calendario actual
+  const isToday = (day) => {
+    return (
+      day &&
+      today.getFullYear() === year &&
+      today.getMonth() === month &&
+      today.getDate() === day
+    );
+  };
+
+  // Obtener el nombre del día de la semana para hoy (para el encabezado)
+  const todayFormatted = today.toLocaleDateString("es-ES", {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+  });
 
   return (
-    <Box>
-      {/* TÍTULO */}
-      <Typography
-        variant="h2"
-        textAlign="center"
-        fontWeight={800}
-        mb={0.5}
-        color="primary"
-        sx={{ fontSize: { xs: "2rem", sm: "2.5rem" } }}
-      >
-        Calendario 2026
-      </Typography>
-
-      <Typography
-        textAlign="center"
-        color="text.secondary"
-        mb={4}
-        sx={{ fontSize: { xs: "0.9rem", sm: "1rem" } }}
-      >
-        Autor: Jorge Patricio Santamaría Cherrez
-      </Typography>
-
-      <Paper
-        elevation={6}
+    <Box sx={{ p: 2, maxWidth: 400, mx: "auto" }}>
+      {/* ENCABEZADO ROJO CON FECHA ACTUAL */}
+      <Box
         sx={{
-          maxWidth: 900,
-          mx: "auto",
-          p: { xs: 2, sm: 4 },
-          borderRadius: 4,
-          backgroundColor: theme.palette.background.default,
-          boxShadow: "0 8px 32px rgba(0, 0, 0, 0.08)",
+          bgcolor: "error.main",
+          color: "white",
+          p: 2,
+          borderRadius: "8px 8px 0 0",
+          textAlign: "center",
         }}
       >
-        {/* HEADER */}
+        <Typography variant="h6" fontWeight={500}>
+          {today.getFullYear()}
+        </Typography>
+        <Typography variant="h4" fontWeight={700}>
+          {todayFormatted.replace(".", "").replace(" ", " ").replace(",", "")}
+        </Typography>
+      </Box>
+
+      {/* CONTENEDOR DEL CALENDARIO */}
+      <Paper
+        elevation={0}
+        sx={{
+          p: 2,
+          borderRadius: "0 0 8px 8px",
+          bgcolor: "background.paper",
+          border: `1px solid ${theme.palette.divider}`,
+        }}
+      >
+        {/* HEADER DE MES */}
         <Box
           display="flex"
           alignItems="center"
           justifyContent="space-between"
-          mb={3}
-          sx={{ gap: 1 }}
+          mb={2}
         >
-          <IconButton
-            onClick={() => setMonth((m) => (m === 0 ? 11 : m - 1))}
-            size="large"
-            sx={{
-              bgcolor: theme.palette.action.hover,
-              "&:hover": { bgcolor: theme.palette.action.selected },
-            }}
-          >
-            <ChevronLeftIcon fontSize="medium" />
+          <IconButton onClick={() => setMonth((m) => (m === 0 ? 11 : m - 1))}>
+            <ChevronLeftIcon />
           </IconButton>
 
-          <Typography
-            variant="h5"
-            fontWeight={700}
-            sx={{
-              flexGrow: 1,
-              textAlign: 'center',
-              fontSize: { xs: "1.2rem", sm: "1.5rem" },
-            }}
-          >
-            {MONTHS[month]} {year}
+          <Typography variant="h6" fontWeight={600}>
+            {MONTHS[month]} de {year}
           </Typography>
 
-          <IconButton
-            onClick={() => setMonth((m) => (m === 11 ? 0 : m + 1))}
-            size="large"
-            sx={{
-              bgcolor: theme.palette.action.hover,
-              "&:hover": { bgcolor: theme.palette.action.selected },
-            }}
-          >
-            <ChevronRightIcon fontSize="medium" />
+          <IconButton onClick={() => setMonth((m) => (m === 11 ? 0 : m + 1))}>
+            <ChevronRightIcon />
           </IconButton>
         </Box>
 
-        {/* CABECERAS DE DÍAS */}
-        <Grid container mb={2}>
-          {DAYS.map((d) => (
-            <Grid item xs={12 / 7} key={d}>
+        {/* CABECERA DE DÍAS */}
+        <Grid container spacing={0.5} mb={1}>
+          {DAYS_SHORT.map((d, i) => (
+            <Grid item xs={12 / 7} key={i}>
               <Typography
                 align="center"
-                fontWeight={700}
+                fontSize="0.9rem"
                 color="text.secondary"
-                sx={{
-                  fontSize: { xs: "0.85rem", sm: "1rem" },
-                  py: 1,
-                  borderRadius: 1,
-                  bgcolor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.03)",
-                }}
+                fontWeight={600}
               >
                 {d}
               </Typography>
@@ -150,56 +128,34 @@ export default function Calendar2026() {
           ))}
         </Grid>
 
-        {/* CALENDARIO */}
+        {/* CUADRÍCULA DE DÍAS */}
         <Grid container spacing={0.5}>
-          {calendar.map((day, index) => {
-            const isToday =
-              day &&
-              today.getFullYear() === year &&
-              today.getMonth() === month &&
-              today.getDate() === day;
-
-            const isWeekend = index % 7 === 0 || index % 7 === 6;
-
-            return (
-              <Grid item xs={12 / 7} key={index}>
-                <Box
-                  sx={{
-                    height: { xs: 60, sm: 72 },
-                    borderRadius: 2,
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    bgcolor: isToday
-                      ? theme.palette.primary.main
-                      : isWeekend
-                        ? theme.palette.mode === "dark"
-                          ? "rgba(255,255,255,0.08)"
-                          : "rgba(0,0,0,0.04)"
-                        : theme.palette.background.paper,
-                    color: isToday
-                      ? theme.palette.primary.contrastText
-                      : theme.palette.text.primary,
-                    border: isToday
-                      ? `2px solid ${theme.palette.primary.dark}`
-                      : "none",
-                    fontWeight: isToday ? 700 : 500,
-                    fontSize: { xs: "0.9rem", sm: "1rem" },
-                    transition: "all 0.2s ease",
-                    "&:hover": !isToday && {
-                      transform: "scale(1.05)",
-                      boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
-                      bgcolor: theme.palette.mode === "dark"
-                        ? "rgba(255,255,255,0.1)"
-                        : "rgba(0,0,0,0.06)",
-                    },
-                  }}
-                >
-                  {day && <Typography>{day}</Typography>}
-                </Box>
-              </Grid>
-            );
-          })}
+          {calendar.map((day, index) => (
+            <Grid item xs={12 / 7} key={index}>
+              <Box
+                sx={{
+                  height: 50,
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  borderRadius: 1,
+                  bgcolor: isToday(day)
+                    ? "primary.main"
+                    : "transparent",
+                  color: isToday(day)
+                    ? "primary.contrastText"
+                    : "text.primary",
+                  fontWeight: isToday(day) ? 700 : 400,
+                  transition: "all 0.2s",
+                  "&:hover": !isToday(day) && {
+                    bgcolor: "action.hover",
+                  },
+                }}
+              >
+                {day && <Typography>{day}</Typography>}
+              </Box>
+            </Grid>
+          ))}
         </Grid>
       </Paper>
     </Box>
